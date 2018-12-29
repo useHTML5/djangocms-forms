@@ -67,7 +67,8 @@
                         grecaptcha.render(widgetId, {
                             sitekey: that.settings.reCaptchaSiteKey,
                             size: that.settings.reCaptchaSize,
-                            theme: that.settings.reCaptchaTheme
+                            theme: that.settings.reCaptchaTheme,
+                            badge : 'inline'
                         });
                         // grecaptcha.execute();
                     }
