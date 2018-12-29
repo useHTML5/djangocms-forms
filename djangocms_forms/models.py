@@ -92,14 +92,9 @@ class FormDefinition(CMSPlugin):
         choices=settings.DJANGOCMS_FORMS_SPAM_PROTECTIONS,
         default=settings.DJANGOCMS_FORMS_DEFAULT_SPAM_PROTECTION)
 
-    templates = (
-        ('djangocms_forms/form_template/bootstrap.html', 'Bootstrap'),
-        ('djangocms_forms/form_template/bootstrap_inline.html', 'Bootstrap Inline'),
-    ) + settings.DJANGOCMS_FORMS_TEMPLATES
-
     form_template = models.CharField(
         _('Form Template'), max_length=150, blank=True,
-        choices=templates,
+        choices=settings.DJANGOCMS_FORMS_TEMPLATES,
         default=settings.DJANGOCMS_FORMS_DEFAULT_TEMPLATE,
     )
 

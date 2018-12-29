@@ -62,10 +62,11 @@ class DjangoCMSFormsConf(AppConf):
     RECAPTCHA_SECRET_KEY = ''
 
     TEMPLATES = (
-        ('djangocms_forms/form_template/default.html', _('Default')),
+        ('djangocms_forms/form_template/bootstrap.html', 'Bootstrap'),
+        ('djangocms_forms/form_template/bootstrap_inline.html', 'Bootstrap Inline'),
     )
 
-    DEFAULT_TEMPLATE = 'djangocms_forms/form_template/default.html'
+    DEFAULT_TEMPLATE = 'djangocms_forms/form_template/bootstrap.html'
 
     DATETIME_FORMAT = '%d/%m/%Y %H:%M'
     EXPORT_FILENAME = 'export-{form_name}-%Y-%m-%d'
