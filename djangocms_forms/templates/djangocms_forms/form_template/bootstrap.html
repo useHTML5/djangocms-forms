@@ -75,7 +75,6 @@
             $(function () {
                 $('.form-recapcha input, .form-recapcha textarea').on('focus', function () {
                     if (!document.load_capcha) {
-                        $.getScript("https://www.google.com/recaptcha/api.js?onload=reCapctchaOnloadCallback&render={{ recaptcha_site_key }}");
                         $('.forms').cmsForms({
                             'reCaptchaSiteKey': '{{ recaptcha_site_key }}',
                             'redirectDelay': {{ redirect_delay|default:1000 }}

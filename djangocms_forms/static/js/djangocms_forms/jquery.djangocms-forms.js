@@ -30,6 +30,7 @@
 
     CMSForms.prototype = {
         init: function () {
+            $.getScript("https://www.google.com/recaptcha/api.js?onload=reCapctchaOnloadCallback&render=" + this.settings.reCaptchaSiteKey);
             var that = this;
             this.form = this.getForm();
             var ajaxOptions = {
@@ -39,7 +40,8 @@
             };
             this.form.on('submit', function (e) {
                 e.preventDefault();
-                grecaptcha.execute(that.widgetId);
+                // grecaptcha.execute(that.settings.reCaptchaSiteKey);
+                // grecaptcha.execute(that.widgetId);
                 $(this).ajaxSubmit(ajaxOptions);
             });
 
@@ -60,14 +62,15 @@
             var that = this;
             $('.g-recaptcha').each(function () {
                 var widgetId = $(this).attr('id');
+                // $(this).attr('data-size', 'invisible');
                 // $(this).attr('data-sitekey', that.settings.reCaptchaSiteKey);
-                that.widgetId = widgetId;
-
-                grecaptcha.render(widgetId, {
+                // that.widgetId = widgetId;
+                that.widgetId = grecaptcha.render(widgetId, {
                     sitekey: that.settings.reCaptchaSiteKey,
                     size: that.settings.reCaptchaSize,
                     theme: that.settings.reCaptchaTheme
                 });
+                grecaptcha.execute(widgetId);
             });
         },
         ajaxSuccess: function (response) {
