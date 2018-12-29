@@ -13,25 +13,19 @@
               enctype="multipart/form-data"{% endif %}>
             <div class="form-errors" style="display:none;"></div>
             {% for field in form.visible_fields %}
-                {% if field|is_google %}
-                    <div class="inv-recaptcha-holder">
-                        {% bootstrap_field field %}
-                    </div>
-                {% else %}
-                    <div class="field-wrapper {{ field|input_class }}
+                <div class="field-wrapper {{ field|input_class }}
                         {{ field.css_classes }}{% if field|is_honeypot %} visuallyhidden{% endif %}">
-                        <div class="field-errors" style="display:none;"></div>
-                        {% if field|is_checkbox %}
-                            {% bootstrap_field field %}
-                        {% endif %}
-                        {% if not field|is_checkbox %}
-                            {% bootstrap_field field %}
-                        {% endif %}
-                        {% if field.help_text %}
-                            <div id="help-text-{{ field.auto_id }}" class="help-text">{{ field.help_text|safe }}</div>
-                        {% endif %}
-                    </div>
-                {% endif %}
+                    <div class="field-errors" style="display:none;"></div>
+                    {% if field|is_checkbox %}
+                        {% bootstrap_field field %}
+                    {% endif %}
+                    {% if not field|is_checkbox %}
+                        {% bootstrap_field field %}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <div id="help-text-{{ field.auto_id }}" class="help-text">{{ field.help_text|safe }}</div>
+                    {% endif %}
+                </div>
             {% endfor %}
             {% csrf_token %}
             {% for hidden in form.hidden_fields %}
@@ -74,8 +68,6 @@
     {#    {% endif %}#}
 {% endaddtoblock %}
 {% addtoblock "js" %}
-
-    {#  onload=reCapctchaOnloadCallback&  #}
     <script src="{% static 'js/djangocms_forms/libs/jquery.form.min.js' %}"></script>
     <script src="{% static 'js/djangocms_forms/jquery.djangocms-forms.js' %}"></script>
     {% if instance.use_recaptcha %}
@@ -83,7 +75,7 @@
             $(function () {
                 $('.form-recapcha input, .form-recapcha textarea').on('focus', function () {
                     if (!document.load_capcha) {
-                        $.getScript("https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}");
+                        $.getScript("https://www.google.com/recaptcha/api.js?onload=reCapctchaOnloadCallback&render={{ recaptcha_site_key }}");
                         $('.forms').cmsForms({
                             'reCaptchaSiteKey': '{{ recaptcha_site_key }}',
                             'redirectDelay': {{ redirect_delay|default:1000 }}

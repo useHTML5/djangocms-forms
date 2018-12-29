@@ -30,6 +30,7 @@
 
     CMSForms.prototype = {
         init: function () {
+            var that = this;
             this.form = this.getForm();
             var ajaxOptions = {
                 type: 'POST',
@@ -38,6 +39,7 @@
             };
             this.form.on('submit', function (e) {
                 e.preventDefault();
+                grecaptcha.execute(that.widgetId);
                 $(this).ajaxSubmit(ajaxOptions);
             });
 
@@ -48,6 +50,7 @@
             } else {
                 this.renderReCaptcha();
             }
+
         },
         getForm: function () {
             return $('form', this.el);
@@ -57,25 +60,14 @@
             var that = this;
             $('.g-recaptcha').each(function () {
                 var widgetId = $(this).attr('id');
+                // $(this).attr('data-sitekey', that.settings.reCaptchaSiteKey);
+                that.widgetId = widgetId;
 
-                function loadRe() {
-                    if (typeof(grecaptcha.render) == 'undefined') {
-                        setTimeout(loadRe, 1000);
-                        return;
-                    }
-                    else {
-                        grecaptcha.render(widgetId, {
-                            sitekey: that.settings.reCaptchaSiteKey,
-                            size: that.settings.reCaptchaSize,
-                            theme: that.settings.reCaptchaTheme
-                            // ,badge: 'inline'
-                        });
-                        // grecaptcha.execute();
-                    }
-                }
-
-                setTimeout(loadRe, 1000);
-
+                grecaptcha.render(widgetId, {
+                    sitekey: that.settings.reCaptchaSiteKey,
+                    size: that.settings.reCaptchaSize,
+                    theme: that.settings.reCaptchaTheme
+                });
             });
         },
         ajaxSuccess: function (response) {
@@ -84,7 +76,6 @@
         },
         ajaxError: function () {
             this.resetForm();
-
             var formErrors = $(this.settings.errorList);
             $(this.settings.errorItem).html(this.settings.ajaxErrorMsg).appendTo(formErrors);
             this.form.find(this.settings.formErrors).append(formErrors).fadeIn('slow');

@@ -44,9 +44,6 @@ def is_file(field):
 def is_honeypot(field):
     return isinstance(field.field, HoneyPotField)
 
-@register.filter
-def is_google(field):
-    return isinstance(field.field.widget, ReCaptchaWidget)
 
 @register.filter
 def is_required(field):
