@@ -5,7 +5,7 @@ from django.utils.six import string_types
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 
-from djangocms_forms.fields import HoneyPotField
+from djangocms_forms.fields import HoneyPotField, ReCaptchaWidget
 
 register = template.Library()
 
@@ -44,6 +44,9 @@ def is_file(field):
 def is_honeypot(field):
     return isinstance(field.field, HoneyPotField)
 
+@register.filter
+def is_google(field):
+    return isinstance(field.field.widget, ReCaptchaWidget)
 
 @register.filter
 def is_required(field):

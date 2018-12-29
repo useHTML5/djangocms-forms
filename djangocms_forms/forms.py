@@ -120,7 +120,7 @@ class FormBuilder(forms.Form):
             self.fields['__toc__'] = HoneyPotField()
         elif form_definition.use_recaptcha:
             field_name = 'recaptcha_%s' % int_to_hashid(form_definition.pk, min_length=8)
-            self.fields[field_name] = ReCaptchaField(label=_('Are you a robot?'))
+            self.fields[field_name] = ReCaptchaField(label=_(''))
 
     def get_unique_field_name(self, field):
         field_name = field.field_name or field.label

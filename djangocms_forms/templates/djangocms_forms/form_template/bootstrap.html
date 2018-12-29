@@ -1,5 +1,5 @@
 {% load cms_tags  djangocms_forms_tags i18n sekizai_tags staticfiles bootstrap4 %}
-<div class="forms" id="{{ instance.form_id }}">
+<div class="forms form-recapcha" id="{{ instance.form_id }}">
     {% if instance.title %}
         <div class="title h3">{{ instance.title }}</div>
     {% endif %}
@@ -13,19 +13,25 @@
               enctype="multipart/form-data"{% endif %}>
             <div class="form-errors" style="display:none;"></div>
             {% for field in form.visible_fields %}
-                <div class="field-wrapper {{ field|input_class }}
+                {% if field|is_google %}
+                    <div class="inv-recaptcha-holder">
+                        {% bootstrap_field field %}
+                    </div>
+                {% else %}
+                    <div class="field-wrapper {{ field|input_class }}
                         {{ field.css_classes }}{% if field|is_honeypot %} visuallyhidden{% endif %}">
-                    <div class="field-errors" style="display:none;"></div>
-                    {% if field|is_checkbox %}
-                        {% bootstrap_field field %}
-                    {% endif %}
-                    {% if not field|is_checkbox %}
-                        {% bootstrap_field field %}
-                    {% endif %}
-                    {% if field.help_text %}
-                        <div id="help-text-{{ field.auto_id }}" class="help-text">{{ field.help_text|safe }}</div>
-                    {% endif %}
-                </div>
+                        <div class="field-errors" style="display:none;"></div>
+                        {% if field|is_checkbox %}
+                            {% bootstrap_field field %}
+                        {% endif %}
+                        {% if not field|is_checkbox %}
+                            {% bootstrap_field field %}
+                        {% endif %}
+                        {% if field.help_text %}
+                            <div id="help-text-{{ field.auto_id }}" class="help-text">{{ field.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% endfor %}
             {% csrf_token %}
             {% for hidden in form.hidden_fields %}
@@ -62,27 +68,30 @@
         }
 
         .grecaptcha-badge {
-                position: fixed !important;
-				bottom: -100px !important;
-				right: 0 !important;
+            bottom: 150px !important;
         }
     </style>
     {#    {% endif %}#}
 {% endaddtoblock %}
 {% addtoblock "js" %}
-    {% if instance.use_recaptcha %}
-        <script src='https://www.google.com/recaptcha/api.js?onload=reCapctchaOnloadCallback&render={{ recaptcha_site_key }}'></script>
-        {#        <script src="https://www.google.com/recaptcha/api.js?onload=reCapctchaOnloadCallback&render=explicit" async#}
-        {#                defer></script>#}
-    {% endif %}
+
+    {#  onload=reCapctchaOnloadCallback&  #}
     <script src="{% static 'js/djangocms_forms/libs/jquery.form.min.js' %}"></script>
     <script src="{% static 'js/djangocms_forms/jquery.djangocms-forms.js' %}"></script>
-    <script type="text/javascript">
-        $(function () {
-            $('.forms').cmsForms({
-                'reCaptchaSiteKey': '{{ recaptcha_site_key }}',
-                'redirectDelay': {{ redirect_delay|default:1000 }}
+    {% if instance.use_recaptcha %}
+        <script type="text/javascript">
+            $(function () {
+                $('.form-recapcha input, .form-recapcha textarea').on('focus', function () {
+                    if (!document.load_capcha) {
+                        $.getScript("https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}");
+                        $('.forms').cmsForms({
+                            'reCaptchaSiteKey': '{{ recaptcha_site_key }}',
+                            'redirectDelay': {{ redirect_delay|default:1000 }}
+                        });
+                        document.load_capcha = true;
+                    }
+                });
             });
-        });
-    </script>
+        </script>
+    {% endif %}
 {% endaddtoblock %}
