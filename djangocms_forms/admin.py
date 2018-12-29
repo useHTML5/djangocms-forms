@@ -20,10 +20,11 @@ from django.utils.safestring import mark_safe
 from django.utils.text import Truncator
 from django.utils.translation import ugettext_lazy as _
 from tablib import Dataset
+from singlemodeladmin import SingleModelAdmin
 
 from .conf import settings
 from .forms import SubmissionExportForm
-from .models import Form, FormSubmission
+from .models import Form, FormSubmission, Config
 
 try:
     from django.contrib.admin.options import IS_POPUP_VAR
@@ -273,3 +274,5 @@ class FormSubmissionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FormSubmission, FormSubmissionAdmin)
+
+admin.site.register(Config, SingleModelAdmin)

@@ -43,6 +43,7 @@ setup(
         'hashids',
         'requests',
         'django-cms>=3.0',
+        'singlemodeladmin==0.8',
     ],
     license="BSD",
     zip_safe=False,

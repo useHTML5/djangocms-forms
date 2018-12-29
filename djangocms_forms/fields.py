@@ -122,12 +122,19 @@ class ReCaptchaField(forms.CharField):
         super(ReCaptchaField, self).__init__(*args, **kwargs)
 
     def clean(self, values):
+        from .models import Config
         super(ReCaptchaField, self).clean(values[0])
         response_token = values[0]
 
         try:
+            secret = ""
+            secret = Config.objects.all().first().SECRET_KEY
+        except Exception as e:
+            pass
+
+        try:
             params = {
-                'secret': settings.DJANGOCMS_FORMS_RECAPTCHA_SECRET_KEY,
+                'secret': secret,
                 'response': response_token
             }
             r = requests.post(self.recaptcha_api, params=params, timeout=5)

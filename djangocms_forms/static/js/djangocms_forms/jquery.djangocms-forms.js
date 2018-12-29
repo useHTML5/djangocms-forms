@@ -1,7 +1,6 @@
 // the semi-colon before function invocation is a safety net against concatenated
 // scripts and/or other plugins which may not be closed properly.
-;(function($, window, document, undefined) {
-
+;(function ($, window, document, undefined) {
     var cmsForms = 'cmsForms',
         defaults = {
             formWrapper: '.form-wrapper',
@@ -9,16 +8,13 @@
             formSuccess: '.form-success',
             fieldWrapper: '.field-wrapper',
             fieldErrors: '.field-errors',
-
             errorClass: 'error',
             errorList: '<ul class="errorlist"></ul>',
             errorItem: '<li></li>',
-            ajaxErrorMsg: 'We\'re sorry. Something Unexpected Happened. Please Try Again Later.',
-
+            ajaxErrorMsg: 'Не получилось отправить. Позвоните по контактному телефону.',
             reCaptchaSiteKey: '',
             reCaptchaTheme: 'light',
-            reCaptchaSize: 'normal',
-
+            reCaptchaSize: 'invisible',
             // needed in case someone overrides the template and doesn't pass
             // in the value when initializing the cmsForms object
             redirectDelay: 1000
@@ -29,57 +25,70 @@
         this.settings = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._name = cmsForms;
-
         this.init();
     }
 
     CMSForms.prototype = {
-        init: function() {
+        init: function () {
             this.form = this.getForm();
             var ajaxOptions = {
                 type: 'POST',
                 success: $.proxy(this.ajaxSuccess, this),
                 error: $.proxy(this.ajaxError, this)
             };
-            this.form.on('submit', function(e) {
+            this.form.on('submit', function (e) {
                 e.preventDefault();
                 $(this).ajaxSubmit(ajaxOptions);
             });
 
             if (typeof(grecaptcha) == 'undefined') {
-                window.reCapctchaOnloadCallback = function() {
+                window.reCapctchaOnloadCallback = function () {
                     this.renderReCaptcha();
                 }.bind(this);
             } else {
                 this.renderReCaptcha();
             }
         },
-        getForm: function() {
+        getForm: function () {
             return $('form', this.el);
         },
-        renderReCaptcha: function() {
+        renderReCaptcha: function () {
+            // $("label[for^=recaptcha_]").hide();
             var that = this;
-            $('.g-recaptcha').each(function() {
+            $('.g-recaptcha').each(function () {
                 var widgetId = $(this).attr('id');
-                grecaptcha.render(widgetId, {
-                    sitekey: that.settings.reCaptchaSiteKey,
-                    size: that.settings.reCaptchaSize,
-                    theme: that.settings.reCaptchaTheme
-                });
+
+                function loadRe() {
+                    if (typeof(grecaptcha.render) == 'undefined') {
+                        setTimeout(loadRe, 1000);
+                        return;
+                    }
+                    else {
+                        grecaptcha.render(widgetId, {
+                            sitekey: that.settings.reCaptchaSiteKey,
+                            size: that.settings.reCaptchaSize,
+                            theme: that.settings.reCaptchaTheme
+                        });
+                        // grecaptcha.execute();
+                    }
+                }
+
+                setTimeout(loadRe, 1000);
+
             });
         },
-        ajaxSuccess: function(response) {
+        ajaxSuccess: function (response) {
             if (response.formIsValid) this.formValid(response);
             else this.formInvalid(response);
         },
-        ajaxError: function() {
+        ajaxError: function () {
             this.resetForm();
 
             var formErrors = $(this.settings.errorList);
             $(this.settings.errorItem).html(this.settings.ajaxErrorMsg).appendTo(formErrors);
             this.form.find(this.settings.formErrors).append(formErrors).fadeIn('slow');
         },
-        resetForm: function() {
+        resetForm: function () {
             this.form.find(this.settings.formErrors).fadeOut().empty();
             this.form.find(this.settings.fieldErrors).fadeOut().empty();
             this.form.find(this.settings.fieldWrapper).removeClass(this.settings.errorClass);
@@ -88,23 +97,23 @@
                 grecaptcha.reset();
             }
         },
-        formValid: function(response) {
+        formValid: function (response) {
             $(this.settings.formSuccess, this.el).fadeIn('slow');
             $(this.settings.formWrapper, this.el).slideUp('slow').remove();
             if (response.redirectUrl) {
-                setTimeout(function() {
+                setTimeout(function () {
                     window.location = response.redirectUrl;
                 }, this.settings.redirectDelay);
             }
         },
-        formInvalid: function(response) {
+        formInvalid: function (response) {
             this.resetForm();
 
-            $.each(response.errors, function(name, errorList) {
+            $.each(response.errors, function (name, errorList) {
                 if (name == '__all__') {
                     // NON_FIELD_ERRORS
                     var formErrors = $(this.settings.errorList);
-                    errorList.forEach(function(error) {
+                    errorList.forEach(function (error) {
                         $(this.settings.errorItem).text(error).appendTo(formErrors);
                     }.bind(this));
                     this.form.find(this.settings.formErrors).append(formErrors).fadeIn('slow');
@@ -115,7 +124,7 @@
                     var fieldWrapper = formField.parents(this.settings.fieldWrapper).addClass(this.settings.errorClass);
 
                     var fieldErrors = $(this.settings.errorList);
-                    errorList.forEach(function(error) {
+                    errorList.forEach(function (error) {
                         $(this.settings.errorItem).text(error).appendTo(fieldErrors);
                     }.bind(this));
                     fieldWrapper.find(this.settings.fieldErrors).append(fieldErrors).fadeIn('slow');
@@ -124,8 +133,8 @@
         }
     };
 
-    $.fn[cmsForms] = function(options) {
-        return this.each(function() {
+    $.fn[cmsForms] = function (options) {
+        return this.each(function () {
             if (!$.data(this, 'plugin_' + cmsForms)) {
                 $.data(this, 'plugin_' + cmsForms, new CMSForms(this, options));
             }

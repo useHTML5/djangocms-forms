@@ -13,7 +13,7 @@ from cms.plugin_pool import plugin_pool
 
 from .conf import settings
 from .forms import FormBuilder, FormDefinitionAdminForm, FormFieldInlineForm
-from .models import FormDefinition, FormField
+from .models import FormDefinition, FormField, Config
 
 
 class FormFieldInline(admin.StackedInline):
@@ -112,7 +112,7 @@ class FormPlugin(CMSPluginBase):
         return select_template([
             instance.form_template,
             settings.DJANGOCMS_FORMS_DEFAULT_TEMPLATE,
-            'djangocms_forms/form_template/default.html'
+            'djangocms_forms/form_template/bootstrap.html'
         ])
 
     def render(self, context, instance, placeholder):
@@ -126,9 +126,15 @@ class FormPlugin(CMSPluginBase):
         redirect_delay = instance.redirect_delay or \
             getattr(settings, 'DJANGOCMS_FORMS_REDIRECT_DELAY', 1000)
 
+        try:
+            public = ""
+            public = Config.objects.all().first().PUBLIC_KEY
+        except Exception as e:
+            pass
+
         context.update({
             'form': form,
-            'recaptcha_site_key': settings.DJANGOCMS_FORMS_RECAPTCHA_PUBLIC_KEY,
+            'recaptcha_site_key': public,
             'redirect_delay': redirect_delay
         })
         return context

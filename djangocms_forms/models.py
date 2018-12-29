@@ -19,6 +19,15 @@ from .fields import PluginReferenceField
 from .managers import ActiveFormManager
 
 
+class Config(models.Model):
+    PUBLIC_KEY = models.CharField('site key', max_length=255, blank=True, null=True)
+    SECRET_KEY = models.CharField('secret key', max_length=255, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "RECAPTCHA настройки"
+        verbose_name_plural = "RECAPTCHA настройки"
+
+
 @python_2_unicode_compatible
 class Form(models.Model):
     name = models.CharField(_('Name'), max_length=255, db_index=True, editable=False)
@@ -76,16 +85,21 @@ class FormDefinition(CMSPlugin):
 
     # Save to database
     save_data = models.BooleanField(
-        _('Save to database'),  default=True,
+        _('Save to database'), default=True,
         help_text=_('Logs all form submissions to the database.'))
     spam_protection = models.SmallIntegerField(
         _('Spam Protection'),
         choices=settings.DJANGOCMS_FORMS_SPAM_PROTECTIONS,
         default=settings.DJANGOCMS_FORMS_DEFAULT_SPAM_PROTECTION)
 
+    templates = (
+        ('djangocms_forms/form_template/bootstrap.html', 'Bootstrap'),
+        ('djangocms_forms/form_template/bootstrap_inline.html', 'Bootstrap Inline'),
+    ) + settings.DJANGOCMS_FORMS_TEMPLATES
+
     form_template = models.CharField(
         _('Form Template'), max_length=150, blank=True,
-        choices=settings.DJANGOCMS_FORMS_TEMPLATES,
+        choices=templates,
         default=settings.DJANGOCMS_FORMS_DEFAULT_TEMPLATE,
     )
 
@@ -142,7 +156,7 @@ class FormField(models.Model):
         help_text=_('A description / instructions for this field.'))
     initial = models.CharField(_('Default Value'), max_length=255, blank=True)
     choice_values = models.TextField(
-        _('Choices'),  blank=True,
+        _('Choices'), blank=True,
         help_text=_('Enter options one per line. For "File Upload" '
                     'field type, enter allowed filetype (e.g .pdf) one per line.'))
     position = models.PositiveIntegerField(_('Position'), blank=True, null=True)
@@ -150,7 +164,7 @@ class FormField(models.Model):
     class Meta:
         verbose_name_plural = _('fields')
         verbose_name = _('field')
-        ordering = ('position', )
+        ordering = ('position',)
 
     def __str__(self):
         return self.label
@@ -176,7 +190,7 @@ class FormField(models.Model):
             attrs.update(extra_attrs)
 
         if (self.required and settings.DJANGOCMS_FORMS_USE_HTML5_REQUIRED
-                and 'required' not in attrs and self.field_type not in ('hidden', 'radio', )):
+            and 'required' not in attrs and self.field_type not in ('hidden', 'radio',)):
             attrs['required'] = 'required'
 
         if self.field_type in settings.DJANGOCMS_FORMS_FIELD_TYPES_WITH_PLACEHOLDER:
@@ -188,27 +202,27 @@ class FormField(models.Model):
         css_classes = {
             '__all__': (),
             'text': ('textinput',),
-            'textarea': ('textarea', ),
-            'email': ('emailinput', ),
-            'number': ('integerfield', ),
-            'phone': ('telephoneinput', ),
-            'url': ('urlfield', ),
+            'textarea': ('textarea',),
+            'email': ('emailinput',),
+            'number': ('integerfield',),
+            'phone': ('telephoneinput',),
+            'url': ('urlfield',),
             'checkbox': ('booleanfield',),
-            'checkbox_multiple': ('checkboxselectmultiple', ),
-            'select': ('choicefield', ),
-            'radio': ('radioselect', ),
-            'file': ('filefield', ),
-            'date': ('dateinput', ),
-            'time': ('timeinput', ),
-            'password': ('passwordinput', ),
-            'hidden': ('hiddeninput', ),
+            'checkbox_multiple': ('checkboxselectmultiple',),
+            'select': ('choicefield',),
+            'radio': ('radioselect',),
+            'file': ('filefield',),
+            'date': ('dateinput',),
+            'time': ('timeinput',),
+            'password': ('passwordinput',),
+            'hidden': ('hiddeninput',),
         }
 
         css_classes.update(settings.DJANGOCMS_FORMS_WIDGET_CSS_CLASSES)
 
-        css_classes = (attrs.get('class', ''), ) + \
-            css_classes.get('__all__', ()) + \
-            css_classes.get(self.field_type, ())
+        css_classes = (attrs.get('class', ''),) + \
+                      css_classes.get('__all__', ()) + \
+                      css_classes.get(self.field_type, ())
 
         attrs['class'] = ' '.join(cls.strip() for cls in css_classes if cls.strip())
         return attrs
@@ -235,7 +249,7 @@ class FormSubmission(models.Model):
     class Meta:
         verbose_name_plural = _('form submissions')
         verbose_name = _('form submission')
-        ordering = ('-creation_date', )
+        ordering = ('-creation_date',)
         permissions = (
             ('export_formsubmission', 'Can export Form Submission'),
         )
