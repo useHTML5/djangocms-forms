@@ -70,7 +70,7 @@
                     size: that.settings.reCaptchaSize,
                     theme: that.settings.reCaptchaTheme
                 });
-                grecaptcha.execute(widgetId);
+                grecaptcha.execute();
             });
         },
         ajaxSuccess: function (response) {
